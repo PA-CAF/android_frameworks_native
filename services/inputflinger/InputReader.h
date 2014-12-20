@@ -144,8 +144,13 @@ struct InputReaderConfiguration {
         // The presence of an external stylus has changed.
         CHANGE_EXTERNAL_STYLUS_PRESENCE = 1 << 7,
 
+<<<<<<< refs/remotes/aospa/nougat-mr2
         // Swap keys changed.
         CHANGE_SWAP_KEYS = 1 << 8,
+=======
+        // Volume keys rotation option changed.
+        CHANGE_VOLUME_KEYS_ROTATION = 1 << 7,
+>>>>>>> HEAD~68
 
         // All devices must be reopened.
         CHANGE_MUST_REOPEN = 1 << 31,
@@ -233,7 +238,11 @@ struct InputReaderConfiguration {
 
     // True to show the location of touches on the touch screen as spots.
     bool showTouches;
-    
+
+    // Remap volume keys according to display rotation
+    // 0 - disabled, 1 - phone or hybrid rotation mode, 2 - tablet rotation mode
+    int volumeKeysRotationMode;
+
     // Ignore finger touches this long after the stylus has been used (including hover)
     nsecs_t stylusPalmRejectionTime;
 
@@ -258,7 +267,11 @@ struct InputReaderConfiguration {
             pointerGestureZoomSpeedRatio(0.3f),
             stylusPalmRejectionTime(50 * 10000000LL), // 50 ms
             showTouches(false),
+<<<<<<< refs/remotes/aospa/nougat-mr2
             swapKeys(false) { }
+=======
+            volumeKeysRotationMode(0) { }
+>>>>>>> HEAD~68
 
     bool getDisplayInfo(bool external, DisplayViewport* outViewport) const;
     void setDisplayInfo(bool external, const DisplayViewport& viewport);
@@ -1145,7 +1158,8 @@ private:
     uint32_t mSource;
     int32_t mKeyboardType;
 
-    int32_t mOrientation; // orientation for dpad keys
+    int32_t mRotationMapOffset; // determines if and how volume keys rotate
+    int32_t mOrientation; // orientation for dpad and volume keys
 
     bool mSwapKeys; // swap back with recents button
 
