@@ -153,6 +153,9 @@ struct InputReaderConfiguration {
         // Stylus icon option changed.
         CHANGE_STYLUS_ICON_ENABLED = 1 << 10,
 
+        // Swap keys changed.
+        CHANGE_SWAP_KEYS = 1 << 8,
+
         // All devices must be reopened.
         CHANGE_MUST_REOPEN = 1 << 31,
     };
@@ -252,6 +255,9 @@ struct InputReaderConfiguration {
     // Remap volume keys according to display rotation
     // 0 - disabled, 1 - phone or hybrid rotation mode, 2 - tablet rotation mode
     int volumeKeysRotationMode;
+
+    // Swap back with recents button
+    bool swapKeys;
 
     InputReaderConfiguration() :
             virtualKeyQuietTime(0),
