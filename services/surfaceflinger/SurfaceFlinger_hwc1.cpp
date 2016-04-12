@@ -163,6 +163,7 @@ SurfaceFlinger::SurfaceFlinger()
         mHWVsyncAvailable(false),
         mDaltonize(false),
         mHasColorMatrix(false),
+        mHasSecondaryColorMatrix(false),
         mHasPoweredOff(false),
         mFrameBuckets(),
         mTotalTime(0),
@@ -1302,7 +1303,8 @@ void SurfaceFlinger::setUpHWComposer() {
                         for (size_t i=0 ; cur!=end && i<count ; ++i, ++cur) {
                             const sp<Layer>& layer(currentLayers[i]);
                             layer->setGeometry(hw, *cur);
-                            if (mDebugDisableHWC || mDebugRegion || mDaltonize || mHasColorMatrix) {
+                            if (mDebugDisableHWC || mDebugRegion || mDaltonize || mHasColorMatrix
+                                    || mHasSecondaryColorMatrix) {
                                 cur->setSkip(true);
                             }
                         }
@@ -2062,11 +2064,15 @@ void SurfaceFlinger::doDisplayComposition(const sp<const DisplayDevice>& hw,
         }
     }
 
-    if (CC_LIKELY(!mDaltonize && !mHasColorMatrix)) {
+    if (CC_LIKELY(!mDaltonize && !mHasColorMatrix && !mHasSecondaryColorMatrix)) {
         if (!doComposeSurfaces(hw, dirtyRegion)) return;
     } else {
         RenderEngine& engine(getRenderEngine());
         mat4 colorMatrix = mColorMatrix;
+        if (mHasSecondaryColorMatrix) {
+            colorMatrix = mHasColorMatrix
+                    ? (colorMatrix * mSecondaryColorMatrix) : mSecondaryColorMatrix;
+        }
         if (mDaltonize) {
             colorMatrix = colorMatrix * mDaltonizer();
         }
@@ -3098,7 +3104,8 @@ void SurfaceFlinger::dumpAllLocked(const Vector<String16>& args, size_t& index,
     result.appendFormat("  h/w composer %s and %s\n",
             hwc.initCheck()==NO_ERROR ? "present" : "not present",
                     (mDebugDisableHWC || mDebugRegion || mDaltonize
-                            || mHasColorMatrix) ? "disabled" : "enabled");
+                            || mHasColorMatrix
+                            || mHasSecondaryColorMatrix) ? "disabled" : "enabled");
     hwc.dump(result);
 
     /*
