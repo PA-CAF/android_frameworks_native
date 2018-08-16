@@ -73,7 +73,11 @@ ExSurfaceFlinger::ExSurfaceFlinger() {
         sAllowHDRFallBack = true;
     }
 
-    mUseHwcVirtualDisplays = false;
+#ifdef DISPLAY_CONFIG_1_1
+    android::sp<vendor::display::config::V1_1::IDisplayConfig> mDisplayConfig_1_1 =
+                            vendor::display::config::V1_1::IDisplayConfig::getService();
+#endif
+
 #ifdef DISPLAY_CONFIG_1_2
     using vendor::display::config::V1_2::IDisplayConfig;
     android::sp<IDisplayConfig> displayConfig = IDisplayConfig::getService();
@@ -84,11 +88,9 @@ ExSurfaceFlinger::ExSurfaceFlinger() {
                   HWC_DISPLAY_EXTERNAL, (HWC_DISPLAY_BUILTIN_2 - HWC_DISPLAY_EXTERNAL)) &&
               !displayConfig->setDisplayIndex(IDisplayConfig::DisplayTypeExt::DISPLAY_VIRTUAL,
                   HWC_DISPLAY_VIRTUAL, 1)) {
-            mUseHwcVirtualDisplays = true;
         }
     }
 #endif
-    ALOGI("Use HWC virtual displays = %d", mUseHwcVirtualDisplays);
 }
 
 ExSurfaceFlinger::~ExSurfaceFlinger() { }
@@ -227,10 +229,9 @@ bool ExSurfaceFlinger::canDrawLayerinScreenShot(
 void ExSurfaceFlinger::setDisplayAnimating(const sp<const DisplayDevice>& hw __unused) {
 #ifdef DISPLAY_CONFIG_1_1
     using vendor::display::config::V1_1::IDisplayConfig;
-    android::sp<IDisplayConfig> displayConfig = IDisplayConfig::getService();
 
     int32_t dpy = hw->getDisplayType();
-    if (displayConfig == NULL || dpy == HWC_DISPLAY_PRIMARY || !mDisableExtAnimation) {
+    if (mDisplayConfig_1_1 == NULL || dpy == HWC_DISPLAY_PRIMARY || !mDisableExtAnimation) {
         return;
     }
 
@@ -247,7 +248,7 @@ void ExSurfaceFlinger::setDisplayAnimating(const sp<const DisplayDevice>& hw __u
         return;
     }
 
-    displayConfig->setDisplayAnimating(dpy, hasScreenshot);
+    mDisplayConfig_1_1->setDisplayAnimating(dpy, hasScreenshot);
     mAnimating = hasScreenshot;
 #endif
 }
